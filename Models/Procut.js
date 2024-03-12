@@ -12,6 +12,10 @@ const ProductSchema= new Schema({
         type:String,
         default:null
     },
+    image:{
+        type:String,
+        default:""
+    },
     rent:{
         type:Number,
         required:true

@@ -6,6 +6,8 @@ dotenv.config()
 const app=express()
 
 app.use(express.json())
+app.use(express.urlencoded({extended: true}))
+app.use(express.static("public"))
 
 let prmition={
     origin:process.env.HOST_URL 

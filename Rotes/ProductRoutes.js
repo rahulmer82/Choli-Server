@@ -1,10 +1,12 @@
 import express from "express"
 import { Product } from "../Models/Procut.js";
 import mongoose from "mongoose";
+import { Upload } from "../Midelware/Multer.js";
+import CloudinaryUpload from "../Cloudinary.js";
 
 const route=express.Router()
 
-route.post('/addproduct',async(req,res)=>{
+route.post('/addproduct',Upload.single("image"), async(req,res)=>{
     let Success=false;
 
  try {
@@ -19,9 +21,16 @@ route.post('/addproduct',async(req,res)=>{
     if(findprodct){
         return  res.status(409).json({msg:"Product already exists!",Success:Success});
     }
+//image Path
+    const localImage=req.file.path
+    
+    const uploadImage=await CloudinaryUpload(localImage)
+
+   
     const Createproduct= new Product({
         productID:id,
         name:name,
+        image:uploadImage.url,
         rent:rent
     })
    
@@ -81,7 +90,7 @@ route.get('/product',async(req,res)=>{
 
 //prouct edit functionality
 
-route.patch('/productedit/:_id',async(req,res)=>{
+route.patch('/productedit/:_id',Upload.single("image"), async(req,res)=>{
 
     let success=false
     try {
@@ -104,6 +113,11 @@ const objectId=new mongoose.Types.ObjectId(_id)
        if(filter.length>0){
        return res.status(403).json({msg:'This ID is already in use',Success:success})
        }
+if(req.file){
+   let updateImage=req.file.path;
+   const UploadImage=await CloudinaryUpload(updateImage);
+   newproduct.image=UploadImage.url
+}
 
         const update=await Product.findByIdAndUpdate({_id:_id},{$set:newproduct},{new:true})
 
