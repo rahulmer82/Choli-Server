@@ -1,11 +1,11 @@
 import fs from "fs"
-
+import dotenv from "dotenv"
 import {v2 as cloudinary} from 'cloudinary';
-          
+          dotenv.config()
 cloudinary.config({ 
-  cloud_name: 'rahulmer', 
-  api_key: '532478123188828', 
-  api_secret: 'AVwkKk1hU311KurnOdfeNVP8yE4' 
+  cloud_name: process.env.CLOUD_NAME, 
+  api_key: process.env.API_KEY, 
+  api_secret: process.env.API_SECRET 
 });
 
 
