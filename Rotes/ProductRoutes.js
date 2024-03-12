@@ -22,15 +22,22 @@ route.post('/addproduct',Upload.single("image"), async(req,res)=>{
         return  res.status(409).json({msg:"Product already exists!",Success:Success});
     }
 //image Path
+let imagePath;
+if(req.file){
     const localImage=req.file.path
     
     const uploadImage=await CloudinaryUpload(localImage)
+    imagePath=uploadImage.url
+}
+
+
+    
 
    
     const Createproduct= new Product({
         productID:id,
         name:name,
-        image:uploadImage.url,
+        image:imagePath,
         rent:rent
     })
    
