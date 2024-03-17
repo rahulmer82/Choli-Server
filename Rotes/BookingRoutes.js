@@ -2,9 +2,10 @@ import express from "express";
 import { Booking } from "../Models/BookinsModel.js";
 import { Product } from "../Models/Procut.js";
 import mongoose from "mongoose";
+import Auth from "../Midelware/Auth.js"
 const router = express.Router();
 
-router.post('/adduser',async(req,res)=>{
+router.post('/adduser',Auth,async(req,res)=>{
     let success=false
 
     try {
@@ -12,7 +13,13 @@ router.post('/adduser',async(req,res)=>{
         if(!( name && number && id)){
             return res.status(401).json({msg:"All Filds Required..!",Success:success})
         };
+const FindProduct=await Product.find({user:req.user.id})
 
+const FindProductID=FindProduct.map((item)=> item.productID==id)
+
+if(FindProductID.indexOf(true)=== -1){
+    return res.status(401).json({msg:"This Product Id Invalid Or Does Not Exist..!"})
+}
          // default date add
         
          const d = new Date();
@@ -28,9 +35,14 @@ const strDate= `${part[0].padStart(2,'0')}/${part[1].padStart(2,'0')}/${part[2]}
 
         //Checking the user is already exist or not  
 
-        const findID=await Booking.find({BookID:id});
+        const UserBookingData=await Booking.find({user:req.user.id})
+       
+
+const data=UserBookingData.filter((value)=>{return value.BookID == id})
+
+        // const findID=await Booking.find({BookID:id});
         
-        const existDate=findID.map((data) => data.date == finalDate );
+        const existDate=data.map((data) => data.date == finalDate );
         const TrueIndex=existDate.indexOf(true); 
         
        if(!(TrueIndex=== -1)){
@@ -52,7 +64,8 @@ const strDate= `${part[0].padStart(2,'0')}/${part[1].padStart(2,'0')}/${part[2]}
             BookID:id,
             date:finalDate,
             rent:rentID.rent,
-            productName:rentID.name
+            productName:rentID.name,
+            user:req.user.id
         })
         
       
@@ -64,7 +77,7 @@ const strDate= `${part[0].padStart(2,'0')}/${part[1].padStart(2,'0')}/${part[2]}
         success=true
           //Now Booking Date Update
       await Product.findOneAndUpdate({productID:id},{$push:{bookingDate:{userid:booking._id,
-    date:finalDate}}},{new: true})
+    date:finalDate,name:name}}},{new: true})
         return  res.status(200).json({booking,Success:true});
 
     } catch (error) {
@@ -74,7 +87,7 @@ const strDate= `${part[0].padStart(2,'0')}/${part[1].padStart(2,'0')}/${part[2]}
 
 // update User Bookings
 
-router.patch("/update/:_id",async(req,res)=>{
+router.patch("/update/:_id",Auth,async(req,res)=>{
     let success=false
     try {
     const {date,name,id,number}=req.body
@@ -92,12 +105,25 @@ if(!finduser){
 }
 let fixID=id|| finduser.BookID
 
-      const findID=await Booking.find({BookID: fixID});
+// find user to store our data
+
+const user= await Booking.find({user:req.user.id})
+
+const findID= user.filter((val)=>{return val.BookID==fixID})
+
+
+
+
+    //   const findID=await Booking.find({BookID: fixID});
 
       if(id){
-        const objectName=await Product.findOne({productID:id}).select('name rent')
-        newBooking.productName=objectName.name;
-        newBooking.rent=objectName.rent;
+
+        const objectData=await Product.find({user:req.user.id})
+        const  object=objectData.filter((val)=>{return val.productID == id})[0]
+        
+        // const objectName=await Product.findOne({productID:id}).select('name rent')
+        newBooking.productName=object.name;
+        newBooking.rent=object.rent;
       }
       // my user filterd
      
@@ -106,8 +132,12 @@ let fixID=id|| finduser.BookID
       
         
       const existDate=filderdata.map((data) => data.date == date );
+
+     
       
       const TrueIndex=existDate.indexOf(true); 
+
+      
       // user convert in stringss
       const str=finduser._id.toString()
      
@@ -124,20 +154,26 @@ let fixID=id|| finduser.BookID
 // if Id Change to Opration done;
 const ObjectId=new mongoose.Types.ObjectId(req.params._id)
 const addDate= date || finduser.date
+const addName=name || finduser.name
 if(id){
-    await Product.updateOne({productID:finduser.BookID},{$pull:{"bookingDate":{"userid":ObjectId}}});
+
     
-    await Product.updateOne({productID:id},{$push:{bookingDate:{userid:ObjectId,date:addDate}}})
+    // await Product.updateOne({productID:finduser.BookID},{$pull:{"bookingDate":{"userid":ObjectId}}});
+
+ await Product.updateOne({user:req.user.id,productID:finduser.BookID},{$pull:{"bookingDate":{"userid":ObjectId}}})
+
+    
+    await Product.updateOne({user:req.user.id,productID:id},{$push:{bookingDate:{userid:ObjectId,date:addDate,name:addName}}})
     
 }
     // update Booking Date in Product
 
-const findid=await Product.findOne({productID:fixID})
+const findid=await Product.findOne({user:req.user.id,productID:fixID})
 
 const setDate=findid.bookingDate.filter((data)=>data.userid.toString()==str)
 let usr=setDate[0]?.userid
 
-const productdate=await Product.findOneAndUpdate({productID:fixID,"bookingDate.userid":usr},{$set:{"bookingDate.$.date":date}},{new:true})
+const productdate=await Product.findOneAndUpdate({productID:fixID,"bookingDate.userid":usr},{$set:{"bookingDate.$.date":date,"bookingDate.$.name":name}},{new:true})
  
 if(!productdate){
     return res.status(401).json({msg:"No Data  Update on Booking date..",Success:success})
@@ -152,7 +188,9 @@ if(!productdate){
 })
 
 // delete user
-router.delete('/userdelete/:_Id',async(req,res)=>
+
+
+router.delete('/userdelete/:_Id',Auth,async(req,res)=>
 {   let success = false;
 try {
     const user=await Booking.findById(req.params._Id)
@@ -186,5 +224,42 @@ if(!userdelete){
     return res.status(401).json({msg:"server error"})
 }
 
+})
+
+// fatch all  data from the database
+router.get("/fetchallData",Auth, async (req, res) => {
+  let  sucess=false
+    try {
+        const users = await Booking.find({user: req.user.id});
+if(!users){
+    return res.status(401).json({msg:"User Not Found!"})
+}
+sucess=true
+        // Sending back a response 
+        return res.status(200).json({data:users,Success:sucess});
+
+      } catch (err) {
+        console.log(err);
+        return res.status(500).json("Server Error");
+      }
+});
+
+// single booking  info by id
+
+router.get("/details/:_id",async (req,res)=>{
+    let sucess=false
+try {
+    const user=await  Booking.findOne({_id : req.params._id});
+    if (!user) {
+        return res.status(401).json({ msg: "No User found" ,Success:sucess })
+        
+    }
+   sucess=true
+    
+return res.status(200).json({ data: user , Success:sucess });
+    
+} catch (error) {
+    return res.status(500).json({msg:"server Eror",error:error});
+}
 })
 export default router

@@ -21,10 +21,12 @@ app.use(cors(prmition))
 
 import route from "./Rotes/ProductRoutes.js";
 import user from "./Rotes/BookingRoutes.js";
+import Authantication from "./Rotes/AuthonticateRoutes.js"
 
 
 const port=process.env.PORT ||5000
 
 app.use('/api',route)
 app.use('/api',user)
+app.use('/api/user',Authantication)
 app.listen(port,()=>{console.log(`app is running in port ${port}`)})

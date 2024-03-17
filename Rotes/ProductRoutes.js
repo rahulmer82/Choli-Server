@@ -3,10 +3,11 @@ import { Product } from "../Models/Procut.js";
 import mongoose from "mongoose";
 import { Upload } from "../Midelware/Multer.js";
 import CloudinaryUpload from "../Cloudinary.js";
+import Auth from "../Midelware/Auth.js"
 
 const route=express.Router()
 
-route.post('/addproduct',Upload.single("image"), async(req,res)=>{
+route.post('/addproduct',Auth,Upload.single("image"), async(req,res)=>{
     let Success=false;
 
  try {
@@ -16,7 +17,7 @@ route.post('/addproduct',Upload.single("image"), async(req,res)=>{
         return res.status(400).json({msg:"Please provide all fields.",Success:Success})
     }
 
-    const findprodct=await Product.findOne({productID:id})
+    const findprodct=await Product.findOne({user:req.user.id,productID:id})
 
     if(findprodct){
         return  res.status(409).json({msg:"Product already exists!",Success:Success});
@@ -31,14 +32,13 @@ if(req.file){
 }
 
 
-    
 
-   
     const Createproduct= new Product({
         productID:id,
         name:name,
         image:imagePath,
-        rent:rent
+        rent:rent,
+        user:req.user.id
     })
    
 if(!Createproduct){
@@ -57,13 +57,12 @@ return res.status(201).json({product:product,Success:Success})
 
 // Fetch all products
 
-route.get('/products',async(req,res)=>{
+route.get('/products',Auth,async(req,res)=>{
     let success=false
     try {
        
-        const product=await Product.find({owner:"Milan"})
+        const product=await Product.find({user:req.user.id})
         
-
         if(!product){
          return   res.status(401).json({msg:"Product does Not Exist..!",Success:success})
         }
@@ -77,11 +76,11 @@ route.get('/products',async(req,res)=>{
 
 // fatch single product
 
-route.get('/product',async(req,res)=>{
+route.get('/product',Auth,async(req,res)=>{
     let success=false
     try {
        const {id}=req.body;
-        const product=await Product.findOne({productID:id})
+        const product=await Product.findOne({user:req.user.id,productID:id})
         
 
         if(!product){
@@ -97,7 +96,7 @@ route.get('/product',async(req,res)=>{
 
 //prouct edit functionality
 
-route.patch('/productedit/:_id',Upload.single("image"), async(req,res)=>{
+route.patch('/productedit/:_id',Auth,Upload.single("image"), async(req,res)=>{
 
     let success=false
     try {
@@ -111,10 +110,17 @@ const objectId=new mongoose.Types.ObjectId(_id)
        const findproduct=await Product.findById({_id:objectId})
     
 
-       const alerdyid=await Product.find({productID:id})
+       const alerdyid=await Product.find({user:req.user.id,productID:id})
 
        
         const filter=alerdyid.filter((item)=>item._id.toString() !== findproduct._id.toString())
+
+        
+
+        if (findproduct.user.toString() !== req.user.id) {
+            return res.status(401).send("Not Allowed");
+        }
+
 
 
        if(filter.length>0){
@@ -149,6 +155,12 @@ route.delete('/remove/:_id',async(req,res)=>{
         if (!prodcut) {
             return res.status(404).send('No product with this Id')
           }
+
+          if (prodcut.user.toString() !== req.user.id) {
+            return res.status(401).send("Not Allowed");
+        }
+        
+
           success = true
           res.status(200).json({msg:'Product Deleted Successfully',Success:success})
     } catch (error) {

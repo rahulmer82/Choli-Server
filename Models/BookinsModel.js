@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 import { Schema } from "mongoose";
 
 const BookingSchema=new Schema({
+    user:{
+        type:Schema.Types.ObjectId,
+        ref: "User"
+
+    },
     productId:{
         type:Schema.Types.ObjectId,
         ref:"Product"
@@ -24,6 +29,10 @@ const BookingSchema=new Schema({
         required:true
     },
     productName:{
+        type:String,
+        default:null
+    },
+    note:{
         type:String,
         default:null
     },

@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 import { Schema } from "mongoose";
 
 const ProductSchema= new Schema({
+    user:{
+        type:Schema.Types.ObjectId,
+        ref: "User"
+    },
     productID:{
         type:Number,
         required:true,
@@ -20,10 +24,7 @@ const ProductSchema= new Schema({
         type:Number,
         required:true
     },
-    owner:{
-        type:String,
-        default:"Milan"
-    },
+   
     bookingDate:{
         type:Array,
         default:[]
