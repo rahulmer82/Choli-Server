@@ -43,7 +43,7 @@ router.post("/sinup",async(req,res)=>{
 
         success=true
 
-        res.status(201).json({token:tokent,Success:success})
+        res.status(201).json({token:tokent,Success:success,msg:"User created successfully!"})
 
         
     } catch (error) {
@@ -88,7 +88,7 @@ try {
     const token=jwt.sign(data,process.env.JWT_SECRET)
    
     success=true
-    res.status(201).json({token:token,Success:success})
+    res.status(201).json({token:token,Success:success,msg:"Login Success..."})
 } catch (error) {
     res.status(402).json({msg:"server error",err:error})
 }

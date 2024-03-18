@@ -17,9 +17,10 @@ route.post('/addproduct',Auth,Upload.single("image"), async(req,res)=>{
         return res.status(400).json({msg:"Please provide all fields.",Success:Success})
     }
 
-    const findprodct=await Product.findOne({user:req.user.id,productID:id})
+    const findprodct=await Product.find({user:req.user.id,productID:id})
+    console.log("productid",findprodct)
 
-    if(findprodct){
+    if(findprodct.length !==0){
         return  res.status(409).json({msg:"Product already exists!",Success:Success});
     }
 //image Path
@@ -46,7 +47,7 @@ return  res.status(409).json({msg:"Product Not Created at this Moment..!",Succes
 }
 const product=await  Createproduct.save();
 Success=true
-return res.status(201).json({product:product,Success:Success})
+return res.status(201).json({product:product,Success:Success,msg:"Your Product Registerd...!"})
  } catch (error) {
    return res.status(400).json({msg:"Server Error",error})
  }   
@@ -67,7 +68,7 @@ route.get('/products',Auth,async(req,res)=>{
          return   res.status(401).json({msg:"Product does Not Exist..!",Success:success})
         }
         success=true
-        res.status(201).json({product:product,Success:success})
+        res.status(201).json({product:product,Success:success,msg:"fetch Products"})
         
     } catch (error) {
      return   res.status(402).json({msg:"server error",error})
@@ -87,7 +88,7 @@ route.get('/product',Auth,async(req,res)=>{
           return  res.status(401).json({msg:"Product does Not Exist..!",Success:success})
         }
         success=true
-        res.status(201).json({product:product,Success:success})
+        res.status(201).json({product:product,Success:success,msg:'Single Product'})
         
     } catch (error) {
       return  res.status(402).json({msg:"server error",error})

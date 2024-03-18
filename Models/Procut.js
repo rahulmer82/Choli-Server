@@ -8,8 +8,7 @@ const ProductSchema= new Schema({
     },
     productID:{
         type:Number,
-        required:true,
-        unique: true
+        required:true
 
     },
     name:{

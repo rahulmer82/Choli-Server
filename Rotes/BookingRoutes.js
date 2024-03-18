@@ -78,7 +78,7 @@ const data=UserBookingData.filter((value)=>{return value.BookID == id})
           //Now Booking Date Update
       await Product.findOneAndUpdate({productID:id},{$push:{bookingDate:{userid:booking._id,
     date:finalDate,name:name}}},{new: true})
-        return  res.status(200).json({booking,Success:true});
+        return  res.status(200).json({booking,Success:true,msg:"your Data Successfully Submited"});
 
     } catch (error) {
         return res.status(409).json({msg:"Internal Server Error",error})
@@ -181,7 +181,7 @@ if(!productdate){
 
 //finally Got A responce...
 
-    return res.status(201).json({update,Success:true})
+    return res.status(201).json({update,Success:true,msg:"Data SuccessFully Updated"})
     } catch (error) {
         return res.status(401).json({msg:"server error"})
     }
@@ -236,7 +236,7 @@ if(!users){
 }
 sucess=true
         // Sending back a response 
-        return res.status(200).json({data:users,Success:sucess});
+        return res.status(200).json({data:users,Success:sucess,msg:"Fetch all booking ..!"});
 
       } catch (err) {
         console.log(err);
@@ -256,7 +256,7 @@ try {
     }
    sucess=true
     
-return res.status(200).json({ data: user , Success:sucess });
+return res.status(200).json({ data: user , Success:sucess,msg:"Successfully Fetch Data" });
     
 } catch (error) {
     return res.status(500).json({msg:"server Eror",error:error});
