@@ -9,7 +9,7 @@ router.post('/adduser',Auth,async(req,res)=>{
     let success=false
 
     try {
-        const {name,number,id,date}=req.body;
+        const {name,number,id,date,note}=req.body;
         if(!( name && number && id)){
             return res.status(401).json({msg:"All Filds Required..!",Success:success})
         };
@@ -65,6 +65,7 @@ const data=UserBookingData.filter((value)=>{return value.BookID == id})
             date:finalDate,
             rent:rentID.rent,
             productName:rentID.name,
+            note:note,
             user:req.user.id
         })
         
@@ -90,12 +91,13 @@ const data=UserBookingData.filter((value)=>{return value.BookID == id})
 router.patch("/update/:_id",Auth,async(req,res)=>{
     let success=false
     try {
-    const {date,name,id,number}=req.body
+    const {date,name,id,number,note}=req.body
     const newBooking={}
     if(date){newBooking.date=date};
     if(name){newBooking.name=name};
     if(id){newBooking.BookID=id};
     if(number){newBooking.mobile=number}
+    if(note){newBooking.note=note}
 
       //Checking the user is already exist or not  
 const finduser= await Booking.findOne({_id:req.params._id})

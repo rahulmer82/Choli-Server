@@ -18,7 +18,7 @@ route.post('/addproduct',Auth,Upload.single("image"), async(req,res)=>{
     }
 
     const findprodct=await Product.find({user:req.user.id,productID:id})
-    console.log("productid",findprodct)
+   
 
     if(findprodct.length !==0){
         return  res.status(409).json({msg:"Product already exists!",Success:Success});
