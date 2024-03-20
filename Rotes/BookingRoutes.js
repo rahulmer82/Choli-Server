@@ -77,7 +77,7 @@ const data=UserBookingData.filter((value)=>{return value.BookID == id})
         const booking=await createUser.save()
         success=true
           //Now Booking Date Update
-      await Product.findOneAndUpdate({productID:id},{$push:{bookingDate:{userid:booking._id,
+      await Product.findOneAndUpdate({user:req.user.id,productID:id},{$push:{bookingDate:{userid:booking._id,
     date:finalDate,name:name}}},{new: true})
         return  res.status(200).json({booking,Success:true,msg:"your Data Successfully Submited"});
 

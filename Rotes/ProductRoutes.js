@@ -17,20 +17,28 @@ route.post('/addproduct',Auth,Upload.single("image"), async(req,res)=>{
         return res.status(400).json({msg:"Please provide all fields.",Success:Success})
     }
 
+
+
     const findprodct=await Product.find({user:req.user.id,productID:id})
    
 
     if(findprodct.length !==0){
         return  res.status(409).json({msg:"Product already exists!",Success:Success});
     }
+
+    console.log("file path",req.file.path)
 //image Path
 let imagePath;
 if(req.file){
     const localImage=req.file.path
+   
     
     const uploadImage=await CloudinaryUpload(localImage)
     imagePath=uploadImage.url
+
+    console.log("cloudinary upload",uploadImage)
 }
+
 
 
 
@@ -149,7 +157,7 @@ if(req.file){
 })
 // delete products
 
-route.delete('/remove/:_id',async(req,res)=>{
+route.delete('/remove/:_id',Auth,async(req,res)=>{
     let success = false;
     try {
         const prodcut=await Product.findByIdAndDelete(req.params._id)
@@ -157,9 +165,9 @@ route.delete('/remove/:_id',async(req,res)=>{
             return res.status(404).send('No product with this Id')
           }
 
-          if (prodcut.user.toString() !== req.user.id) {
-            return res.status(401).send("Not Allowed");
-        }
+        //   if (prodcut.user.toString() !== req.user.id) {
+        //     return res.status(401).send("Not Allowed");
+        // }
         
 
           success = true
