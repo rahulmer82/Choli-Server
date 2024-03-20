@@ -13,6 +13,10 @@ router.post('/adduser',Auth,async(req,res)=>{
         if(!( name && number && id)){
             return res.status(401).json({msg:"All Filds Required..!",Success:success})
         };
+
+       if( number.toString().trim().length !==10){
+return res.status(401).json({msg:`Phone Number Should be 10 Digits`,Success:success})
+       }
 const FindProduct=await Product.find({user:req.user.id})
 
 const FindProductID=FindProduct.map((item)=> item.productID==id)
@@ -96,7 +100,13 @@ router.patch("/update/:_id",Auth,async(req,res)=>{
     if(date){newBooking.date=date};
     if(name){newBooking.name=name};
     if(id){newBooking.BookID=id};
-    if(number){newBooking.mobile=number}
+    if(number){
+        if( number.toString().trim().length !==10){
+            return res.status(401).json({msg:`Phone Number Should be 10 Digits`,Success:success})
+                   }else{
+                    newBooking.mobile=number
+                   }
+        };
     if(note){newBooking.note=note}
 
       //Checking the user is already exist or not  
