@@ -26,7 +26,7 @@ route.post('/addproduct',Auth,Upload.single("image"), async(req,res)=>{
         return  res.status(409).json({msg:"Product already exists!",Success:Success});
     }
 
-    console.log("file path",req.file.path)
+    
 //image Path
 let imagePath;
 if(req.file){
@@ -36,7 +36,6 @@ if(req.file){
     const uploadImage=await CloudinaryUpload(localImage)
     imagePath=uploadImage.url
 
-    console.log("cloudinary upload",uploadImage)
 }
 
 
