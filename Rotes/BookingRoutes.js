@@ -216,7 +216,7 @@ const id=req.params._Id
      const objectId=new mongoose.Types.ObjectId(id)
     
 
-     const DelteBookingDate=await Product.updateOne({productID:user.BookID},{$pull:{"bookingDate":{"userid":objectId}}})
+     const DelteBookingDate=await Product.updateOne({user:req.user.id,productID:user.BookID},{$pull:{"bookingDate":{"userid":objectId}}})
 
 
      if(!DelteBookingDate){
