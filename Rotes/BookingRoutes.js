@@ -56,7 +56,7 @@ const data=UserBookingData.filter((value)=>{return value.BookID == id})
        // 
         // check rents
 
-        const rentID=await Product.findOne({productID:id}).select('rent name');
+        const rentID=await Product.findOne({user:req.user.id,productID:id}).select('rent name');
        
         if(!rentID){
             return res.status(400).json({msg:"Rent not recived",Success:success})
